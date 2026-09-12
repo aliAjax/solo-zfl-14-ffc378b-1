@@ -290,7 +290,9 @@ export function createApp(root, options = {}) {
   }
 
   function onSubmit(event) {
-    if (event.target.id !== "repair-form") return;
+    // 注意：编辑表单含 name="id" 的隐藏控件，会遮蔽 form 元素内建的 id 属性
+    // （event.target.id 在编辑态返回该 input 节点），因此必须用 getAttribute 判断。
+    if (event.target.getAttribute?.("id") !== "repair-form") return;
     event.preventDefault();
     handleSubmit(event.target);
   }

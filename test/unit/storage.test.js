@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { STORAGE_KEY } from "../src/constants.js";
-import { defaultState, parseStoredState, RepairStore } from "../src/storage.js";
+import { STORAGE_KEY } from "../../src/constants.js";
+import { defaultState, parseStoredState, RepairStore } from "../../src/storage.js";
 
 function memoryStorage(initial = {}) {
   const map = new Map(Object.entries(initial));

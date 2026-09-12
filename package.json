@@ -8,10 +8,13 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0 --port 6114",
     "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:browser": "vitest run --project browser",
     "test:watch": "vitest"
   },
   "devDependencies": {
     "happy-dom": "^20.14.5",
+    "playwright": "^1.63.0",
     "vite": "^6.3.5",
     "vitest": "^3.2.7"
   }

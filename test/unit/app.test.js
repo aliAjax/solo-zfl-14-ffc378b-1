@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createApp } from "../src/app.js";
+import { createApp } from "../../src/app.js";
 
 function memoryStorage(initial = {}) {
   let map = new Map(Object.entries(initial));
@@ -156,6 +156,40 @@ describe("编辑 / 删除", () => {
     root.querySelector('[data-action="cancel-edit"]').click();
     expect(root.querySelector(".panel h2").textContent).toBe("新增维修事项");
     expect(form(root).querySelector('input[name="id"]')).toBeNull();
+  });
+
+  it("编辑表单中 name=id 控件遮蔽 form.id 时仍拦截原生提交并更新同一条记录", () => {
+    // 真实浏览器里具名表单控件会遮蔽 HTMLFormElement 的内建 id 属性，
+    // 使 form.id 返回该 input 节点而非字符串；happy-dom 不模拟这一点，这里手动复现。
+    const { root, app } = setup();
+    submitForm(root, validData({ title: "待编辑事项", cost: "100" }));
+    const card = cardByTitle(root, "待编辑事项");
+    const id = card.dataset.id;
+    card.querySelector('[data-action="edit"]').click();
+
+    const editForm = form(root);
+    const hiddenIdInput = editForm.querySelector('input[name="id"]');
+    expect(hiddenIdInput).toBeTruthy();
+    Object.defineProperty(editForm, "id", { value: hiddenIdInput, configurable: true });
+    expect(editForm.id).toBe(hiddenIdInput);
+
+    const nativeSubmit = vi.spyOn(HTMLFormElement.prototype, "submit").mockImplementation(() => {});
+    fillForm(root, { title: "遮蔽后仍能保存", cost: "160" });
+    const notCanceled = editForm.dispatchEvent(
+      new Event("submit", { bubbles: true, cancelable: true })
+    );
+
+    // 原生提交被 preventDefault 拦截（dispatchEvent 返回 false），且未调用 form.submit()
+    expect(notCanceled).toBe(false);
+    expect(nativeSubmit).not.toHaveBeenCalled();
+    app.flush();
+
+    const updated = cardByTitle(root, "遮蔽后仍能保存");
+    expect(updated).toBeTruthy();
+    expect(updated.dataset.id).toBe(id);
+    expect(cards(root)).toHaveLength(2);
+    expect(updated.textContent).toContain("¥160");
+    expect(cardByTitle(root, "待编辑事项")).toBeFalsy();
   });
 
   it("删除后列表与存储同步更新", () => {

@@ -11,8 +11,14 @@ npm install
 npm run dev      # 开发服务器 http://localhost:5114
 npm run build    # 生产构建到 dist/
 npm run preview  # 预览生产构建 http://localhost:6114
-npm test         # 运行自动化测试（vitest + happy-dom）
+npm test         # 全部测试（happy-dom 单元测试 + Playwright 真实浏览器回归）
+npm run test:unit    # 仅单元/集成测试（无需浏览器）
+npm run test:browser # 仅真实浏览器回归
 ```
+
+浏览器回归需要 Chromium：`npx playwright install chromium`。
+若已安装则自动运行（测试会自行启动 dev server，结束后关闭）；未安装时该组用例自动跳过。
+受限容器可借助仓库内置的 `vendor/browser-libs`（linux/arm64 运行时库）运行，无需 root。
 
 ## 功能
 
